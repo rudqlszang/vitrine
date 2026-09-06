@@ -39,11 +39,7 @@ class HomeAppBar extends SliverPersistentHeaderDelegate {
         ),
       ),
       alignment: Alignment.center,
-      // 워드마크의 letterSpacing 이 오른쪽에 여백을 만들어 중앙이 밀린다. 보정한다.
-      child: const Padding(
-        padding: EdgeInsets.only(left: 8),
-        child: BrandMark(),
-      ),
+      child: const BrandMark(),
     );
   }
 
