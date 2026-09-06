@@ -6,7 +6,8 @@ import '../../core/theme/typography.dart';
 import '../../data/catalog/catalog_repository.dart';
 import '../../data/catalog/resolved_item.dart';
 import '../../widgets/product_card.dart';
-import 'home_header.dart';
+import '../product/product_detail_screen.dart';
+import 'home_app_bar.dart';
 
 /// 홈(쇼핑) 화면.
 ///
@@ -20,7 +21,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const _initialBalance = 1000000000000; // 1조
 
   final _repo = CatalogRepository();
   List<ResolvedItem> _items = const [];
@@ -48,6 +48,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _openDetail(ResolvedItem item) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ProductDetailScreen(item: item),
+      ),
+    );
+  }
+
   List<ResolvedItem> get _visible {
     final c = _category;
     if (c == null) return _items;
@@ -68,12 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ? const SizedBox.shrink()
             : CustomScrollView(
                 slivers: [
-                  SliverPersistentHeader(
+                  const SliverPersistentHeader(
                     pinned: true,
-                    delegate: HomeHeader(
-                      balance: _initialBalance,
-                      saved: 0,
-                    ),
+                    delegate: HomeAppBar(),
                   ),
                   SliverToBoxAdapter(
                     child: _CategoryBar(
@@ -94,11 +99,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: AppSpacing.cardGap,
-                        mainAxisSpacing: AppSpacing.sectionGap,
+                        mainAxisSpacing: 32,
                         childAspectRatio: 0.62,
                       ),
                       delegate: SliverChildBuilderDelegate(
-                        (context, i) => ProductCard(item: _visible[i]),
+                        (context, i) => ProductCard(
+                          item: _visible[i],
+                          onTap: () => _openDetail(_visible[i]),
+                        ),
                         childCount: _visible.length,
                       ),
                     ),
@@ -132,7 +140,7 @@ class _CategoryBar extends StatelessWidget {
           horizontal: AppSpacing.screenPadding,
         ),
         itemCount: categories.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(width: 18),
+        separatorBuilder: (_, _) => const SizedBox(width: 18),
         itemBuilder: (context, i) {
           final label = i == 0 ? Strings.categoryAll : categories[i - 1];
           final value = i == 0 ? null : categories[i - 1];

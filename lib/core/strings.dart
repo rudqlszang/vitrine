@@ -7,6 +7,7 @@ abstract final class Strings {
   static const saved = '절약';
   static const categoryAll = '전체';
   static const savedPending = '대기';
+  static const savedEmpty = '아직 아낀 금액이 없습니다';
   static const savedConfirmed = '확정';
 
   // 주문 상태
@@ -25,6 +26,8 @@ abstract final class Strings {
 
   // 액션
   static const buy = '구매하기';
+  static const sellerPrefix = '판매';
+  static const detailNotice = '실제로 구매되지 않습니다. 지른 금액은 그대로 절약으로 쌓입니다.';
   static const confirm = '확인';
   static const cancelOrder = '주문 취소';
 

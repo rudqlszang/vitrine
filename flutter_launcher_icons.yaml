@@ -1,0 +1,9 @@
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/brand/launcher.png"
+  # 적응형 아이콘: 검정 배경에 모노그램만 얹는다.
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/brand/launcher.png"
+  # 모노그램 자체에 여백이 충분해서 추가 패딩을 주지 않는다.
+  min_sdk_android: 21

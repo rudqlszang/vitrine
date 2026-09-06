@@ -26,7 +26,7 @@ class SerpApiSource implements ProductSource {
     if (cached != null && !cached.isExpired) return cached.value;
 
     try {
-      final results = await _search(item.query);
+      final results = await search(item.query);
       final kept = ResultFilter.apply(results, item.priceKrw);
 
       final ProductItem product;
@@ -64,7 +64,8 @@ class SerpApiSource implements ProductSource {
     return out;
   }
 
-  Future<List<RawResult>> _search(String query) async {
+  /// 검색 결과를 정규화해 돌려준다. 수집 스크립트가 자체 선별을 하려고 쓴다.
+  Future<List<RawResult>> search(String query) async {
     final res = await _dio.get<Map<String, dynamic>>(
       _endpoint,
       queryParameters: {

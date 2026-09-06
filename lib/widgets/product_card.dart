@@ -60,8 +60,11 @@ class _Thumbnail extends StatelessWidget {
     final src = url;
     if (src == null || src.isEmpty) return const _EmptyThumb();
 
+    // 수집 단계에서 흰 배경 스튜디오 컷만 고르므로 배경도 흰색으로 맞춘다.
+    // 회색이면 이미지 여백과 카드 배경 사이에 띠가 생긴다.
     return Container(
-      color: AppColors.surface,
+      color: AppColors.bg,
+      padding: const EdgeInsets.all(8),
       child: Image.network(
         src,
         fit: BoxFit.contain,
@@ -75,7 +78,7 @@ class _Thumbnail extends StatelessWidget {
             child: child,
           );
         },
-        errorBuilder: (_, __, ___) => const _EmptyThumb(),
+        errorBuilder: (_, _, _) => const _EmptyThumb(),
       ),
     );
   }
