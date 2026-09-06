@@ -151,7 +151,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
               FadeTransition(
                 opacity: _conversion,
                 child: Text(
-                  Conversion.describe(afterSaved),
+                  Conversion.sentence(afterSaved),
                   style: AppTypo.body.copyWith(color: AppColors.textSecond),
                 ),
               ),

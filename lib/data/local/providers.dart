@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/order.dart';
+import '../../domain/profile.dart';
 import '../../domain/savings.dart';
 import 'order_box.dart';
+import 'profile_box.dart';
 
 /// main() 에서 열어둔 박스를 주입한다.
 final orderBoxProvider = Provider<OrderBox>(
@@ -43,3 +45,36 @@ final ordersProvider =
 final savingsProvider = Provider<Savings>(
   (ref) => Savings.from(ref.watch(ordersProvider)),
 );
+
+/// main() 에서 열어둔 프로필 박스.
+final profileBoxProvider = Provider<ProfileBox>(
+  (ref) => throw UnimplementedError('main 에서 override 해야 한다'),
+);
+
+/// 가입 정보. null 이면 아직 가입 전이다.
+class ProfileNotifier extends Notifier<Profile?> {
+  @override
+  Profile? build() => ref.read(profileBoxProvider).readProfile();
+
+  Future<void> save(Profile p) async {
+    await ref.read(profileBoxProvider).writeProfile(p);
+    state = p;
+  }
+}
+
+final profileProvider =
+    NotifierProvider<ProfileNotifier, Profile?>(ProfileNotifier.new);
+
+/// 배송지. null 이면 아직 입력 전이다.
+class AddressNotifier extends Notifier<Address?> {
+  @override
+  Address? build() => ref.read(profileBoxProvider).readAddress();
+
+  Future<void> save(Address a) async {
+    await ref.read(profileBoxProvider).writeAddress(a);
+    state = a;
+  }
+}
+
+final addressProvider =
+    NotifierProvider<AddressNotifier, Address?>(AddressNotifier.new);

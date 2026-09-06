@@ -1,4 +1,5 @@
 import '../core/time/time_scale.dart';
+import 'order_schedule.dart';
 import 'order_status.dart';
 
 /// 주문 한 건.
@@ -15,6 +16,7 @@ class Order {
     required this.createdAt,
     this.imageUrl,
     this.cancelledAt,
+    this.option,
   });
 
   final String id;
@@ -28,11 +30,17 @@ class Order {
   /// null 이면 유효한 주문이다.
   final DateTime? cancelledAt;
 
+  /// 선택한 사이즈 등. 없는 카테고리도 있다.
+  final String? option;
+
   bool get isCancelled => cancelledAt != null;
 
   Duration get elapsed => TimeScale.instance.elapsedSince(createdAt);
 
-  OrderStatus get status => OrderStatus.fromElapsed(elapsed);
+  OrderStatus get status => OrderSchedule.statusOf(id, elapsed);
+
+  /// 다음 단계까지 남은 시간. 배송 완료면 null.
+  Duration? get remaining => OrderSchedule.remaining(id, elapsed);
 
   /// 절약이 확정되었는가. 취소된 주문은 확정되지 않는다.
   bool get isConfirmed => !isCancelled && status.isConfirmed;

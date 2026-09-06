@@ -9,7 +9,11 @@ import '../../core/theme/typography.dart';
 import '../../data/catalog/resolved_item.dart';
 import '../../data/local/providers.dart';
 import '../../domain/order.dart';
+import '../../domain/purchase_option.dart';
 import '../checkout/checkout_screen.dart';
+import '../checkout/option_sheet.dart';
+import '../checkout/order_form_screen.dart';
+import '../checkout/payment_progress.dart';
 
 /// 상품 상세.
 ///
@@ -66,8 +70,6 @@ class ProductDetailScreen extends ConsumerWidget {
                           ),
                         ],
                         const SizedBox(height: AppSpacing.sectionGap),
-                        const _Notice(),
-                        const SizedBox(height: AppSpacing.sectionGap),
                       ],
                     ),
                   ),
@@ -85,28 +87,49 @@ class ProductDetailScreen extends ConsumerWidget {
     );
   }
 
+  /// 구매 버튼 → 옵션 선택 → 주문서 → 결제 진행 → 결제 완료.
+  /// 크림·무신사의 흐름을 따른다. 한 번에 끝나면 지른 감각이 남지 않는다.
   Future<void> _buy(BuildContext context, WidgetRef ref) async {
-    // 결제 화면이 "결제 직전" 상태를 보여줘야 하므로 먼저 읽어둔다.
-    final before = ref.read(savingsProvider);
+    // 1) 사이즈가 있는 카테고리만 옵션을 묻는다.
+    String? option;
+    if (PurchaseOption.forCategory(item.category).isNotEmpty) {
+      option = await OptionSheet.show(context, item);
+      if (option == null || !context.mounted) return;
+    }
 
+    // 2) 주문서. 총 결제금액을 돌려받는다.
+    final total = await Navigator.of(context).push<int>(
+      MaterialPageRoute<int>(
+        builder: (_) => OrderFormScreen(item: item, option: option),
+      ),
+    );
+    if (total == null || !context.mounted) return;
+
+    // 3) 결제 승인을 기다리는 시간.
+    final before = ref.read(savingsProvider);
+    await PaymentProgress.run(context);
+    if (!context.mounted) return;
+
+    // 4) 주문 확정.
     final order = Order(
       id: const Uuid().v4(),
       productId: item.id,
       brand: item.brand,
       title: item.title,
-      price: item.priceKrw,
+      price: total,
       imageUrl: item.imageUrl,
       createdAt: DateTime.now(),
+      option: option,
     );
     await ref.read(ordersProvider.notifier).add(order);
-
     if (!context.mounted) return;
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => CheckoutScreen(
           brand: item.brand,
           title: item.title,
-          price: item.priceKrw,
+          price: total,
           before: before,
         ),
       ),
@@ -134,21 +157,6 @@ class _Hero extends StatelessWidget {
             ? Container(color: AppColors.surface)
             : Image.network(src, fit: BoxFit.contain),
       ),
-    );
-  }
-}
-
-/// 이 앱이 무엇인지 잊지 않도록 상세에 한 줄 남긴다.
-class _Notice extends StatelessWidget {
-  const _Notice();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      color: AppColors.surface,
-      child: Text(Strings.detailNotice, style: AppTypo.caption),
     );
   }
 }

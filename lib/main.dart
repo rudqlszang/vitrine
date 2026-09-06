@@ -8,8 +8,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'core/strings.dart';
 import 'core/theme/app_theme.dart';
 import 'data/local/order_box.dart';
+import 'data/local/profile_box.dart';
 import 'data/local/providers.dart';
-import 'features/home/home_screen.dart';
+import 'features/shell/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +25,14 @@ Future<void> main() async {
 
   await Hive.initFlutter();
   final orders = await OrderBox.open();
+  final profile = await ProfileBox.open();
 
   runApp(
     ProviderScope(
-      overrides: [orderBoxProvider.overrideWithValue(orders)],
+      overrides: [
+        orderBoxProvider.overrideWithValue(orders),
+        profileBoxProvider.overrideWithValue(profile),
+      ],
       child: const VitrineApp(),
     ),
   );
@@ -65,7 +70,7 @@ class _VitrineAppState extends ConsumerState<VitrineApp> {
       title: Strings.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.build(),
-      home: const HomeScreen(),
+      home: const AppShell(),
     );
   }
 }
