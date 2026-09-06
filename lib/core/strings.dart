@@ -26,9 +26,13 @@ abstract final class Strings {
 
   // 액션
   static const buy = '구매하기';
+  static const notEnoughBalance = '잔고가 부족합니다';
   static const sellerPrefix = '판매';
   static const detailNotice = '실제로 구매되지 않습니다. 지른 금액은 그대로 절약으로 쌓입니다.';
   static const confirm = '확인';
+  static const checkoutPaid = '결제 완료';
+  static const checkoutBalance = '잔액';
+  static const checkoutCoolingHint = '배송 완료 전까지 취소할 수 있습니다';
   static const cancelOrder = '주문 취소';
 
   // 셋업 검증 화면 (1단계 전용, 이후 제거)

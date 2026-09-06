@@ -28,6 +28,7 @@ dependencies:
 
   # 숫자/통화 포맷
   intl: ^0.20.3
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:

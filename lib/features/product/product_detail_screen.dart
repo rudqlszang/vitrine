@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../core/format/won_format.dart';
 import '../../core/strings.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/theme/typography.dart';
 import '../../data/catalog/resolved_item.dart';
+import '../../data/local/providers.dart';
+import '../../domain/order.dart';
+import '../checkout/checkout_screen.dart';
 
 /// 상품 상세.
 ///
 /// 이미지 한 장 · 브랜드 · 상품명 · 가격 · 구매 버튼.
 /// 부티크 진열대처럼 상품 하나만 두고 나머지는 비운다.
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({super.key, required this.item});
 
   final ResolvedItem item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final savings = ref.watch(savingsProvider);
+    final affordable = savings.balance >= item.priceKrw;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -66,11 +74,46 @@ class ProductDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            _BuyBar(item: item),
+            _BuyBar(
+              item: item,
+              affordable: affordable,
+              onBuy: () => _buy(context, ref),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _buy(BuildContext context, WidgetRef ref) async {
+    // 결제 화면이 "결제 직전" 상태를 보여줘야 하므로 먼저 읽어둔다.
+    final before = ref.read(savingsProvider);
+
+    final order = Order(
+      id: const Uuid().v4(),
+      productId: item.id,
+      brand: item.brand,
+      title: item.title,
+      price: item.priceKrw,
+      imageUrl: item.imageUrl,
+      createdAt: DateTime.now(),
+    );
+    await ref.read(ordersProvider.notifier).add(order);
+
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CheckoutScreen(
+          brand: item.brand,
+          title: item.title,
+          price: item.priceKrw,
+          before: before,
+        ),
+      ),
+    );
+
+    // 결제를 마치면 상세에 남을 이유가 없다. 홈으로 돌려보낸다.
+    if (context.mounted) Navigator.of(context).maybePop();
   }
 }
 
@@ -111,9 +154,15 @@ class _Notice extends StatelessWidget {
 }
 
 class _BuyBar extends StatelessWidget {
-  const _BuyBar({required this.item});
+  const _BuyBar({
+    required this.item,
+    required this.affordable,
+    required this.onBuy,
+  });
 
   final ResolvedItem item;
+  final bool affordable;
+  final VoidCallback onBuy;
 
   @override
   Widget build(BuildContext context) {
@@ -129,9 +178,13 @@ class _BuyBar extends StatelessWidget {
         border: Border(top: BorderSide(color: AppColors.divider)),
       ),
       child: FilledButton(
-        // 구매 플로우는 6단계에서 붙인다.
-        onPressed: () {},
-        child: Text('${Won.format(item.priceKrw)}  ${Strings.buy}'),
+        // 잔고가 모자랄 때만 잔고 이야기를 꺼낸다.
+        onPressed: affordable ? onBuy : null,
+        child: Text(
+          affordable
+              ? '${Won.format(item.priceKrw)}  ${Strings.buy}'
+              : Strings.notEnoughBalance,
+        ),
       ),
     );
   }
