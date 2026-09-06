@@ -58,6 +58,8 @@ abstract final class Strings {
   static const addressLine1 = '주소';
   static const addressLine2 = '상세주소';
   static const save = '저장';
+  static const postcodeTitle = '주소 검색';
+  static const postcodeSearch = '검색';
 
   // 결제 완료
   static const confirm = '확인';
@@ -78,7 +80,7 @@ abstract final class Strings {
   static const cancelDo = '취소하기';
   static const cancelled = '취소됨';
   static const orderSavedConfirmed = '절약이 확정되었습니다';
-  static const nextStageIn = '다음 단계까지';
+  static const nextStageIn = '다음 단계까지 예상';
 
   // 마이페이지
   static const myPageTitle = '마이페이지';

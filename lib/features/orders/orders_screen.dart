@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/format/duration_format.dart';
 import '../../core/format/won_format.dart';
 import '../../core/strings.dart';
 import '../../core/theme/tokens.dart';
@@ -118,7 +119,8 @@ class _OrderTile extends ConsumerWidget {
               ),
               if (!order.isCancelled && remaining != null)
                 Text(
-                  '${Strings.nextStageIn} ${_left(remaining)}',
+                  '${Strings.nextStageIn} '
+                  '${DurationText.approximate(remaining)}',
                   style: AppTypo.caption,
                 ),
             ],
@@ -230,10 +232,4 @@ class _OrderTile extends ConsumerWidget {
     }
   }
 
-  /// 남은 시간을 사람이 읽는 형태로. 배속이 걸려 있으면 실제로는 더 빨리 지난다.
-  static String _left(Duration d) {
-    if (d.inHours >= 1) return '${d.inHours}시간';
-    if (d.inMinutes >= 1) return '${d.inMinutes}분';
-    return '곧';
-  }
 }

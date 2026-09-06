@@ -7,6 +7,7 @@ import '../../core/theme/tokens.dart';
 import '../../data/local/providers.dart';
 import '../../domain/profile.dart';
 import '../../widgets/form_field.dart';
+import 'postcode_search_screen.dart';
 
 /// 배송지 입력.
 ///
@@ -55,6 +56,16 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
       _phone.text.trim().isNotEmpty &&
       _line1.text.trim().isNotEmpty;
 
+  /// 검색 결과로 우편번호와 도로명주소를 채우고 상세주소로 포커스를 넘긴다.
+  Future<void> _searchPostcode() async {
+    final result = await PostcodeSearchScreen.show(context);
+    if (result == null) return;
+    setState(() {
+      _postcode.text = result.postcode;
+      _line1.text = result.displayAddress;
+    });
+  }
+
   Future<void> _save() async {
     final address = Address(
       recipient: _recipient.text.trim(),
@@ -100,19 +111,40 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 24),
-                  AppTextField(
-                    label: Strings.addressPostcode,
-                    controller: _postcode,
-                    hint: '00000',
-                    keyboardType: TextInputType.number,
-                    formatters: [FilteringTextInputFormatter.digitsOnly],
-                    maxLength: 5,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          label: Strings.addressPostcode,
+                          controller: _postcode,
+                          hint: '00000',
+                          keyboardType: TextInputType.number,
+                          formatters: [FilteringTextInputFormatter.digitsOnly],
+                          maxLength: 5,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.textPrimary,
+                          side: const BorderSide(color: AppColors.divider),
+                          minimumSize: const Size(96, 42),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(AppRadius.base)),
+                          ),
+                        ),
+                        onPressed: _searchPostcode,
+                        child: const Text(Strings.postcodeSearch),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   AppTextField(
                     label: Strings.addressLine1,
                     controller: _line1,
-                    hint: '도로명 주소',
+                    hint: '검색하거나 직접 입력',
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 24),
