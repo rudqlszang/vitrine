@@ -36,23 +36,28 @@ class _ProgressView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(
-              strokeWidth: 1.4,
-              color: AppColors.textPrimary,
+    // Material 조상 없이 Text 를 그리면 노란 이중 밑줄이 붙는다.
+    // 다이얼로그는 Overlay 위에 떠서 Scaffold 를 상속받지 못하므로 직접 씌운다.
+    return Material(
+      type: MaterialType.transparency,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.4,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(Strings.payProcessing, style: AppTypo.body),
-          const SizedBox(height: 6),
-          Text(Strings.payProcessingSub, style: AppTypo.caption),
-        ],
+            const SizedBox(height: 20),
+            Text(Strings.payProcessing, style: AppTypo.body),
+            const SizedBox(height: 6),
+            Text(Strings.payProcessingSub, style: AppTypo.caption),
+          ],
+        ),
       ),
     );
   }

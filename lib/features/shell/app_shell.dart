@@ -22,25 +22,31 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-enum _Phase { splash, signup, main }
-
 class _AppShellState extends ConsumerState<AppShell> {
-  _Phase _phase = _Phase.splash;
+  bool _splashDone = false;
   int _tab = 0;
-
-  void _afterSplash() {
-    final signedUp = ref.read(profileProvider) != null;
-    setState(() => _phase = signedUp ? _Phase.main : _Phase.signup);
-  }
 
   @override
   Widget build(BuildContext context) {
-    return switch (_phase) {
-      _Phase.splash => SplashScreen(onDone: _afterSplash),
-      _Phase.signup =>
-        SignupScreen(onDone: () => setState(() => _phase = _Phase.main)),
-      _Phase.main => _main(),
-    };
+    if (!_splashDone) {
+      return SplashScreen(onDone: () => setState(() => _splashDone = true));
+    }
+
+    // 가입 여부를 화면이 따로 들고 있지 않는다.
+    // 프로필이 있으면 매장 안, 없으면 가입 화면.
+    // 로그아웃으로 프로필이 지워지면 여기서 알아서 가입 화면으로 돌아간다.
+    final profile = ref.watch(profileProvider);
+    if (profile == null) {
+      // 로그아웃 직후에는 탭 위치도 처음으로 되돌린다.
+      if (_tab != 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() => _tab = 0);
+        });
+      }
+      return const SignupScreen();
+    }
+
+    return _main();
   }
 
   Widget _main() {

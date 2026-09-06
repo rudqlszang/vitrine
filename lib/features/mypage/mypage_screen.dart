@@ -100,6 +100,12 @@ class MyPageScreen extends ConsumerWidget {
             Container(height: 8, color: AppColors.surface),
             const _TimeScaleRow(),
           ],
+
+          Container(height: 8, color: AppColors.surface),
+          _Menu(
+            label: Strings.logout,
+            onTap: () => _confirmLogout(context, ref),
+          ),
           const SizedBox(height: 40),
         ],
       ),
@@ -110,6 +116,39 @@ class MyPageScreen extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => screen),
     );
+  }
+
+  /// 계정이 없으므로 로그아웃과 데이터 삭제가 같은 동작이다.
+  /// 주문·절약이 전부 사라지고 되돌릴 수 없으니 분명히 알린다.
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bg,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.base)),
+        ),
+        title: const Text(Strings.logoutConfirmTitle, style: AppTypo.title),
+        content: const Text(Strings.logoutConfirmBody, style: AppTypo.body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(Strings.cancelKeep),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              Strings.logout,
+              style: AppTypo.body.copyWith(color: AppColors.accent),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // 프로필이 사라지면 AppShell 이 가입 화면으로 되돌린다.
+    if (ok == true) await resetEverything(ref);
   }
 
   static String _date(DateTime d) =>

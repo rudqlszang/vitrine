@@ -78,3 +78,17 @@ class AddressNotifier extends Notifier<Address?> {
 
 final addressProvider =
     NotifierProvider<AddressNotifier, Address?>(AddressNotifier.new);
+
+/// 로그아웃 = 로컬 데이터 전체 삭제.
+///
+/// 계정도 서버도 없으므로 로그아웃과 초기화가 같은 동작이다.
+/// 주문·절약·배송지·프로필이 한꺼번에 사라지고 가입 화면으로 돌아간다.
+Future<void> resetEverything(WidgetRef ref) async {
+  await ref.read(orderBoxProvider).clear();
+  await ref.read(profileBoxProvider).clear();
+
+  // 박스를 비운 뒤 상태를 다시 읽게 한다.
+  ref.invalidate(ordersProvider);
+  ref.invalidate(profileProvider);
+  ref.invalidate(addressProvider);
+}

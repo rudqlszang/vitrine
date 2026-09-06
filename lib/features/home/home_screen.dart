@@ -132,33 +132,53 @@ class _CategoryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
-        ),
-        itemCount: categories.length + 1,
-        separatorBuilder: (_, _) => const SizedBox(width: 18),
-        itemBuilder: (context, i) {
-          final label = i == 0 ? Strings.categoryAll : categories[i - 1];
-          final value = i == 0 ? null : categories[i - 1];
-          final active = selected == value;
-          return GestureDetector(
-            onTap: () => onSelect(value),
-            behavior: HitTestBehavior.opaque,
-            child: Center(
-              child: Text(
-                label,
-                style: AppTypo.body.copyWith(
-                  color: active ? AppColors.textPrimary : AppColors.textSecond,
-                  fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                ),
+    const hPadding = AppSpacing.screenPadding;
+
+    // 카테고리가 화면 폭에 다 들어가면 좌우 끝에 맞춰 고르게 펼친다.
+    // 왼쪽 정렬로 두면 오른쪽에 빈 공간이 남아 줄 전체가 한쪽으로 쏠려 보인다.
+    // 항목이 늘어 폭을 넘기면 그때는 가로 스크롤로 넘어간다.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final inner = constraints.maxWidth - hPadding * 2;
+        return SizedBox(
+          height: 44,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: hPadding),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: inner),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  for (var i = 0; i <= categories.length; i++)
+                    _item(i),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _item(int i) {
+    final label = i == 0 ? Strings.categoryAll : categories[i - 1];
+    final value = i == 0 ? null : categories[i - 1];
+    final active = selected == value;
+
+    return GestureDetector(
+      onTap: () => onSelect(value),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        // 글자만 두면 터치 영역이 좁다. 좌우로 조금 넓혀 준다.
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        child: Text(
+          label,
+          style: AppTypo.body.copyWith(
+            color: active ? AppColors.textPrimary : AppColors.textSecond,
+            fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
       ),
     );
   }

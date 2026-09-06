@@ -44,7 +44,9 @@ flutter:
   uses-material-design: true
 
   assets:
+    # 하위 폴더는 자동 포함되지 않는다. 디렉터리마다 따로 선언해야 한다.
     - assets/
+    - assets/brand/
     - .env
 
   fonts:

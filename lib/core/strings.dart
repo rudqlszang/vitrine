@@ -20,7 +20,7 @@ abstract final class Strings {
   static const statusDelivered = '배송 완료';
 
   static const statusPaidSub = '주문이 접수되었습니다';
-  static const statusPreparingSub = '부티크에서 상품을 확인하고 있어요';
+  static const statusPreparingSub = 'VITRINE에서 상품을 확인하고 있어요';
   static const statusInspectingSub = '전문 검수팀이 확인하고 있어요';
   static const statusPackedSub = '곧 발송될 예정이에요';
   static const statusShippingSub = '오늘 안에 도착할 예정이에요';
@@ -92,6 +92,9 @@ abstract final class Strings {
   static const myReport = '절약 리포트';
   static const myJoined = '가입일';
   static const myTimeScale = '시간 배속 (개발용)';
+  static const logout = '로그아웃';
+  static const logoutConfirmTitle = '로그아웃할까요?';
+  static const logoutConfirmBody = '주문 내역과 절약 기록이 모두 삭제되고 처음 상태로 돌아갑니다. 되돌릴 수 없습니다.';
 
   // 회원가입
   static const signupTitle = '시작하기';

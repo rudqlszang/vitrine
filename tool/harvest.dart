@@ -26,10 +26,32 @@ Future<void> main(List<String> args) async {
     return;
   }
 
+  // 기본은 증분. 이미 받아둔 항목은 건너뛰고 새 항목만 조회한다.
+  // 무료 쿼터가 월 250회뿐이라 전체 재수집은 명시할 때만 한다.
+  final refreshAll = args.contains('--all');
+
   final catalog = CatalogParser.parse(
     await File('assets/catalog.json').readAsString(),
   );
-  stdout.writeln('${catalog.length}개 수집 시작 (쿼터 ${catalog.length}회 소진)\n');
+
+  final existing = <String, Map<String, dynamic>>{};
+  if (!refreshAll) {
+    final file = File(_output);
+    if (file.existsSync()) {
+      final prev = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+      for (final row in (prev['items'] as List<dynamic>)) {
+        final m = row as Map<String, dynamic>;
+        // 조회에 실패했던 항목은 다시 시도한다.
+        if (m['isLive'] == true) existing[m['id'] as String] = m;
+      }
+    }
+  }
+
+  final todo = catalog.where((c) => !existing.containsKey(c.id)).length;
+  stdout.writeln(
+    '카탈로그 ${catalog.length}개 · 재사용 ${existing.length}개 · '
+    '조회 $todo개 (쿼터 $todo회 소진)\n',
+  );
 
   final source = SerpApiSource(key);
   final picker = CandidatePicker();
@@ -40,6 +62,12 @@ Future<void> main(List<String> args) async {
   var fallback = 0;
 
   for (final item in catalog) {
+    final cached = existing[item.id];
+    if (cached != null) {
+      resolved.add(cached);
+      continue;
+    }
+
     final chosen = await _resolveOne(source, picker, item);
     if (chosen == null) {
       fallback++;

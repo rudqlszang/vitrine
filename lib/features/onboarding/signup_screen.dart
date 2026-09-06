@@ -19,9 +19,7 @@ import '../../widgets/form_field.dart';
 ///
 /// 가입을 마치는 순간 잔고 ₩1조가 들어온다. 계좌를 개설하는 감각이다.
 class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({super.key, required this.onDone});
-
-  final VoidCallback onDone;
+  const SignupScreen({super.key});
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -44,6 +42,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Future<void> _submit() async {
     setState(() => _granting = true);
 
+    // 연출을 먼저 보여주고 저장은 그 뒤에 한다.
+    // 저장하는 순간 화면이 넘어가 버리면 잔고 지급 장면을 볼 수 없다.
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    if (!mounted) return;
+
     await ref.read(profileProvider.notifier).save(
           Profile(
             name: _name.text.trim(),
@@ -52,9 +55,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           ),
         );
 
-    // 잔고가 들어오는 장면을 잠깐 보여준다.
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-    if (mounted) widget.onDone();
   }
 
   @override
